@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiz Lead Nurture — Email Flows by Persona</title>
+<style>
+  :root{ --blue:#1a73e8; --ink:#1a2330; --muted:#6b7785; --line:#e4e8ee; --bg:#f4f6f9; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55}
+  header.top{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line);padding:14px 20px}
+  header.top h1{margin:0 0 4px;font-size:17px}
+  header.top p{margin:0;font-size:12.5px;color:var(--muted)}
+  nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  nav button{border:1px solid var(--line);background:#fff;color:var(--ink);padding:7px 12px;border-radius:999px;font-size:13px;cursor:pointer}
+  nav button.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+  main{max-width:720px;margin:0 auto;padding:24px 16px 80px}
+  .persona{display:none}
+  .persona.active{display:block}
+  .persona-intro{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:18px}
+  .persona-intro h2{margin:0 0 6px;font-size:20px}
+  .persona-intro .meta{font-size:12.5px;color:var(--muted)}
+  .persona-intro .meta code{background:var(--bg);padding:1px 6px;border-radius:4px}
+  .email{background:#fff;border:1px solid var(--line);border-radius:10px;margin:0 0 18px;overflow:hidden}
+  .email .hd{padding:10px 16px;background:#fafbfc;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+  .email .hd .tag{font-weight:700;color:var(--blue)}
+  .email .meta-rows{padding:12px 18px 4px}
+  .email .subject{font-size:16px;font-weight:700;margin:0 0 2px}
+  .email .preview{font-size:13px;color:var(--muted);font-style:italic;margin:0 0 4px}
+  .email .from{font-size:12px;color:var(--muted)}
+  .email .body{padding:6px 18px 18px;border-top:1px dashed var(--line);margin-top:8px}
+  .email .body p{margin:0 0 12px;font-size:14.5px}
+  .email .body ul{margin:0 0 12px;padding-left:20px;font-size:14.5px}
+  .email .body li{margin:0 0 5px}
+  .btn{display:inline-block;padding:11px 20px;background:var(--blue);color:#fff !important;text-decoration:none;border-radius:6px;font-weight:600;font-size:14px}
+  .quote{background:#f5f7fa;border-left:3px solid var(--blue);padding:10px 14px;border-radius:4px;font-style:italic}
+  .guarantee{background:#eef7ee;border:1px solid #cfe8cf;padding:12px 14px;border-radius:6px}
+  .ph{background:#fff8e1;border:1px dashed #f0ad4e;padding:10px 12px;border-radius:6px}
+  .fill{background:#fff3cd;padding:0 4px;border-radius:3px;font-weight:600}
+  .universal-note{font-size:12.5px;color:var(--muted);background:#eef3fb;border:1px solid #d7e3f7;border-radius:8px;padding:10px 14px;margin-bottom:18px}
+  a{color:var(--blue)}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Quiz Lead Nurture (v2) — Email Flows by Persona</h1>
+  <p>Rendered from the live Customer.io templates, branches resolved per persona with sample data (name + lesson estimate). Highlighted <span class="fill">[bits]</span> are placeholders still to fill. E6 (survey) &amp; E7 (final) are universal — shown once under "Universal".</p>
+  <nav id="nav"></nav>
+</header>
+<main id="main"></main>
+
+<script>
+/* ---- sample data per persona ---- */
+const BTN = '<p><a class="btn" href="https://licencemate.com.au/intro-lesson/book">Book my first lesson — $99</a></p>';
+const BTN_ASSESS = '<p><a class="btn" href="https://licencemate.com.au/intro-lesson/book">Book my assessment lesson — $99</a></p>';
+const BTN_DIAG = '<p><a class="btn" href="https://licencemate.com.au/intro-lesson/book">Book my diagnostic lesson — $99</a></p>';
+const SIGN = '<p>— The LicenceMate team</p>';
+const FROM = 'From: LicenceMate &lt;hello@licencemate.com.au&gt;';
+
+/* Proof + guarantee block shared inside E3 */
+const PROOF = `<p>And here's the proof behind it:</p>
+<ul><li><strong>1,200+</strong> South Australian learners taught</li>
+<li><strong>81%</strong> pass the VORT first time</li>
+<li>Accredited instructors, dual-control cars — and the <strong>same instructor every lesson</strong>, not a roster</li></ul>
+<p class="guarantee"><strong>Our guarantee:</strong> you won't sit the test until you're ready to pass it. Your plan includes a full mock on your actual test route, marked the way the examiner will — and if you pass that mock but still don't pass the VORT, your re-test is free. We don't book you in to gamble; we book you in to pass.</p>`;
+
+const personas = {
+  beginner_local: {
+    label: "Beginner local", name: "Jordan", est: 14,
+    emails: [
+      { tag:"E1", day:"Day 0", subject:"Your P-plates plan — about 14 lessons", preview:"Plus the bit about the $99 most people miss.",
+        body:`<p>Hi Jordan,</p>
+        <p>You just saw your plan — based on your quiz, about <strong>14 lessons</strong> to be test-ready. I've saved it so you can come back any time: <a href="#">View your plan</a></p>
+        <p>Most people in your spot are on their P's in about six weeks, not the months it sounds like — and your plan is real. If it turns out you need fewer lessons, we'll tell you.</p>
+        <p>The easiest way to start is a single first lesson for <strong>$99</strong>. But here's the part worth understanding:</p>
+        <p>If you carry on with lessons, the <strong>whole $99 comes off your package</strong> — so your first lesson ends up costing you nothing. The only way you're ever out the $99 is if you do one lesson and decide it's not for you. And even then, you've had a real, full lesson for less than our normal rate.</p>
+        <p>So there's no real way to lose. <strong>Worst case</strong>, you got a discounted first lesson. <strong>Best case</strong>, it cost you nothing and you're on your way to your P's.</p>
+        ${BTN}
+        <p>One more thing — the question I get most from learners and parents is &ldquo;do I even need lessons if Mum or Dad can teach me?&rdquo; It's a fair question, and I'll answer it honestly next time.</p>${SIGN}` },
+      { tag:"E2", day:"Day 1", subject:"“Can't a parent just teach me?”", preview:"An honest answer, not a sales pitch.",
+        body:`<p>Hi Jordan,</p>
+        <p>Here's the honest version, even though it's not the obvious sales answer: yes, you absolutely should practise with a parent. The state wants a stack of supervised hours, and paying an instructor for all of them would cost a fortune — so practice with Mum or Dad is part of the plan, not the enemy of it.</p>
+        <p>But parents teach you to drive the way <em>they</em> drive — habits and all, some of which the examiner fails you for. An instructor's job is sharper: get you safe, and get you through the test the way it's actually marked. The smart play is both.</p>
+        <p>And we won't pad your plan with lessons you don't need — it's not even in our interest to. We live on reviews and referrals; selling you lessons you don't need earns us a bad review and zero referrals. The fastest way for us to grow is to get you passed quickly.</p>
+        <p>Next, I'll walk you through exactly what happens in that first lesson — because for a lot of people, nerves are the real reason they put it off.</p>
+        ${BTN}${SIGN}` },
+      { tag:"E3", day:"Day 2", subject:"What actually happens in your first lesson", preview:"No surprises — start to finish.",
+        body:`<p>Hi Jordan,</p>
+        <p>If you haven't driven much, the first lesson is a big unknown — and that's what makes people wait. So here's how it goes: your instructor meets you somewhere convenient, you start somewhere quiet, you go entirely at your own pace, and the car has dual controls so you're never not in safe hands. Most people finish surprised at how much calmer it felt.</p>
+        <p class="quote">Naomi told us her son &ldquo;comes home feeling more confident after each lesson,&rdquo; with the instructor giving &ldquo;great tips on exactly what he needed to improve.&rdquo;</p>
+        ${PROOF}
+        ${BTN}
+        <p>One more thing before you decide — the bit everyone asks about: what it costs, and why it's actually worth it. Next.</p>${SIGN}` },
+      { tag:"E4", day:"Day 4", subject:"Is it worth it? Here's the actual maths", preview:"It's less than it looks — and the cheapest way through.",
+        body:`<p>Hi Jordan,</p>
+        <p>Totally fair — it can look like a lot. But it's less than it seems: about <span class="fill">[$X a week]</span>, and it's everything you need to pass, not a guess.</p>
+        <p>The cheaper option is usually cheaper <em>per lesson</em>, not <em>per licence</em> — clocking up hours just driving around means more lessons to get anywhere. With a structured plan you get test-ready in fewer lessons, not more. Compare it to failing once: the re-test fee, weeks of delay, more lessons to stay sharp. Passing first time is the cheapest way through — and we can split it into instalments.</p>
+        ${BTN}
+        <p>One last thing before you go — and it's not about money. It's about time. I'll explain.</p>${SIGN}` },
+      { tag:"E5", day:"Day 7", subject:"The real cost of waiting (it isn't money)", preview:"Every week is a week off your P's.",
+        body:`<p>Hi Jordan,</p>
+        <p>The licence is just the paperwork. What you're really buying is the first time you drive somewhere on your own — work, uni, the beach, a mate's place at 11pm — no asking, no waiting on a lift. And it's closer than it feels: most people in your spot are on their P's in about six weeks, not the months it sounds like. But the clock only starts once you do — every week you wait is a week that freedom sits on hold.</p>
+        <p>Your plan put you at about <strong>14 lessons</strong>, and we've got instructors with openings near you — starting now is simply the difference between sooner and later.</p>
+        <p>And we take the admin off your plate: your lessons count toward your 75 logbook hours, we sign the logbook, and we book the test for you.</p>
+        ${BTN}
+        <p>Next, I'll ask you just one quick question — what's actually holding you up. One tap, that's it.</p>${SIGN}` }
+    ]
+  },
+  beginner_overseas: {
+    label: "Beginner overseas", name: "Mei", est: 10,
+    emails: [
+      { tag:"E1", day:"Day 0", subject:"Your P-plates plan — about 10 lessons", preview:"Plus the bit about the $99 most people miss.",
+        body:`<p>Hi Mei,</p>
+        <p>You just saw your plan — based on your quiz, about <strong>10 lessons</strong> to be test-ready. I've saved it so you can come back any time: <a href="#">View your plan</a></p>
+        <p>Most people in your spot are on their P's in about six weeks, not the months it sounds like — and your plan is real. If it turns out you need fewer lessons, we'll tell you.</p>
+        <p>The easiest way to start is a single first lesson for <strong>$99</strong>. But here's the part worth understanding:</p>
+        <p>If you carry on with lessons, the <strong>whole $99 comes off your package</strong> — so your first lesson ends up costing you nothing. The only way you're ever out the $99 is if you do one lesson and decide it's not for you. And even then, you've had a real, full lesson for less than our normal rate.</p>
+        <p>So there's no real way to lose. <strong>Worst case</strong>, you got a discounted first lesson. <strong>Best case</strong>, it cost you nothing and you're on your way to your P's.</p>
+        ${BTN}
+        <p>One more thing — the part that trips up most overseas drivers isn't the driving, it's the process: permit, VORT, then converting your licence. I'll make it simple next time.</p>${SIGN}` },
+      { tag:"E2", day:"Day 1", subject:"Converting your licence here — the simple version", preview:"The permit clock, the VORT, and what the examiner marks.",
+        body:`<p>Hi Mei,</p>
+        <p>The bit that trips most overseas drivers up isn't the driving — it's the process. Here's the short version: get your learner's permit, sit the VORT, then convert — and we time it so the 3-month permit clock never beats you.</p>
+        <p>Driving here also isn't quite like home. Give-way priority, roundabout lanes and the observation sequence are what the examiner actually marks — and they catch out people who've driven for years overseas. Your first $99 lesson shows you exactly where those gaps are.</p>
+        <p class="quote">Alan came to us as an international student who'd driven in China — he said the switch to driving on the left here felt daunting. We got him booked in and everything sorted before his permit expired.</p>
+        <p>Next, I'll show you exactly what happens in that first lesson.</p>
+        ${BTN}${SIGN}` },
+      { tag:"E3", day:"Day 2", subject:"What actually happens in your first lesson", preview:"No surprises — start to finish.",
+        body:`<p>Hi Mei,</p>
+        <p>If you're still getting used to the roads here, the first lesson is a big unknown — and the unknown is what makes people wait. So here's how it goes: your instructor meets you somewhere convenient, you start somewhere quiet, you go at your own pace, and the car has dual controls so you're never not in safe hands. And we can pair you with an instructor who fits — including a female or same-language instructor on request.</p>
+        ${PROOF}
+        ${BTN}
+        <p>One more thing before you decide — the bit everyone asks about: what it costs, and why it's actually worth it. Next.</p>${SIGN}` },
+      { tag:"E4", day:"Day 4", subject:"Is it worth it? Here's the actual maths", preview:"It's less than it looks — and the cheapest way through.",
+        body:`<p>Hi Mei,</p>
+        <p>Totally fair — it can look like a lot. But it's less than it seems: about <span class="fill">[$X a week]</span>, and it's everything you need to pass, not a guess.</p>
+        <p>The cheaper option is usually cheaper <em>per lesson</em>, not <em>per licence</em> — clocking up hours just driving around means more lessons to get anywhere. With a structured plan you get test-ready in fewer lessons, not more. Compare it to failing once: the re-test fee, weeks of delay, more lessons to stay sharp. Passing first time is the cheapest way through — and we can split it into instalments.</p>
+        ${BTN}
+        <p>One last thing before you go — and it's not about money. It's about time. I'll explain.</p>${SIGN}` },
+      { tag:"E5", day:"Day 7", subject:"The real cost of waiting (it isn't money)", preview:"Every week is a week off your P's.",
+        body:`<p>Hi Mei,</p>
+        <p>Getting your licence here is really about getting your life here moving — driving yourself to work and around your new city without depending on anyone. And it's faster than it feels: around six weeks for most people in your spot. There's also a clock on it — your permit doesn't wait — so starting now keeps the timing on your side instead of racing it later.</p>
+        <p>Your plan put you at about <strong>10 lessons</strong>, and we've got instructors with openings near you — starting now is simply the difference between sooner and later.</p>
+        <p>And we take the admin off your plate — we book the test for you when you're ready, so it's one less thing between you and your P's.</p>
+        ${BTN}
+        <p>Next, I'll ask you just one quick question — what's actually holding you up. One tap, that's it.</p>${SIGN}` }
+    ]
+  },
+  confident_local: {
+    label: "Confident local", name: "Liam", est: 6,
+    emails: [
+      { tag:"E1", day:"Day 0", subject:"Your P-plates plan — about 6 lessons", preview:"Plus the bit about the $99 most people miss.",
+        body:`<p>Hi Liam,</p>
+        <p>You just saw your plan — based on your quiz, about <strong>6 lessons</strong> to be test-ready. I've saved it so you can come back any time: <a href="#">View your plan</a></p>
+        <p>Most people in your spot are on their P's in as little as a few weeks — for you this is test-prep, not learning to drive from scratch.</p>
+        <p>The easiest way to start is a single first lesson for <strong>$99</strong>. But here's the part worth understanding:</p>
+        <p>If you carry on with lessons, the <strong>whole $99 comes off your package</strong> — so your first lesson ends up costing you nothing. The only way you're ever out the $99 is if you do one lesson and decide it's not for you. And even then, you've had a real, full lesson for less than our normal rate.</p>
+        <p>So there's no real way to lose. <strong>Worst case</strong>, you got a discounted first lesson. <strong>Best case</strong>, it cost you nothing and you're on your way to your P's.</p>
+        ${BTN}
+        <p>One more thing — if you can already drive, you're probably wondering whether you need lessons at all. I'll be straight with you about that next time.</p>${SIGN}` },
+      { tag:"E2", day:"Day 1", subject:"You don't need lessons. You need a pass.", preview:"$99 to find out if you're test-ready.",
+        body:`<p>Hi Liam,</p>
+        <p>You can already drive — so we won't waste your time re-teaching what you've nailed. You probably do drive fine. But the test scores specific things most good drivers lose marks on: head checks, speed buffers, the exact local route.</p>
+        <p>Your first $99 lesson is an assessment, not a course: one lesson tells you whether you're test-ready, so you don't burn a whole test attempt finding out. Don't gamble <span class="fill">$370</span> on a maybe.</p>
+        <p>Next, a quick story about a driver who was sure the test was just a formality.</p>
+        ${BTN_ASSESS}${SIGN}` },
+      { tag:"E3", day:"Day 2", subject:"“I'd been driving two years. I still failed.”", preview:"It's never the driving. It's the bit you can't see.",
+        body:`<p>Hi Liam,</p>
+        <p>Most confident drivers treat the test as a formality — then lose marks on the small, test-specific things they can't see in themselves: head checks, speed buffers, the exact local route.</p>
+        <p class="ph"><strong>[TESTIMONIAL — fill before launch]</strong> A real named learner who'd driven a year or two, was sure the test was a formality, failed first go on something small, then passed a lesson or two later.</p>
+        ${PROOF}
+        ${BTN_ASSESS}
+        <p>One more thing before you decide — the bit everyone asks about: what it costs, and why it's actually worth it. Next.</p>${SIGN}` },
+      { tag:"E4", day:"Day 4", subject:"No lock-in — pay as you go", preview:"$99 is a readiness check, not a commitment.",
+        body:`<p>Hi Liam,</p>
+        <p>You don't have to commit to a package to find out where you stand. The $99 first lesson is a readiness check, not a down-payment — if one lesson is all you need, that's all you do.</p>
+        <p>And on price: cheaper per lesson isn't cheaper per licence. A cheap instructor clocking up hours around the block costs more in the end than getting test-ready in a few focused sessions — especially once you factor in a re-sit: the fee, weeks of delay, and doing it all again.</p>
+        ${BTN}
+        <p>One last thing before you go — and it's not about money. It's about time. I'll explain.</p>${SIGN}` },
+      { tag:"E5", day:"Day 7", subject:"The real cost of waiting (it isn't money)", preview:"Every week is a week off your P's.",
+        body:`<p>Hi Liam,</p>
+        <p>You already know what you're missing — it's not the driving, it's the freedom to just go. Wherever, whenever, no plus-one. And for you it's quick: most people in your spot are on their P's in around two weeks. Every week you sit on it is a week of freedom you've basically already earned — just not using.</p>
+        <p>Your plan put you at about <strong>6 lessons</strong>, and we've got instructors with openings near you — starting now is simply the difference between sooner and later.</p>
+        <p>And we take the admin off your plate — we book the test for you when you're ready, so it's one less thing between you and your P's.</p>
+        ${BTN}
+        <p>Next, I'll ask you just one quick question — what's actually holding you up. One tap, that's it.</p>${SIGN}` }
+    ]
+  },
+  confident_overseas: {
+    label: "Confident overseas", name: "Priya", est: 5,
+    emails: [
+      { tag:"E1", day:"Day 0", subject:"Your P-plates plan — about 5 lessons", preview:"Plus the bit about the $99 most people miss.",
+        body:`<p>Hi Priya,</p>
+        <p>You just saw your plan — based on your quiz, about <strong>5 lessons</strong> to be test-ready. I've saved it so you can come back any time: <a href="#">View your plan</a></p>
+        <p>Most people in your spot are on their P's in as little as a few weeks — for you this is test-prep, not learning to drive from scratch.</p>
+        <p>The easiest way to start is a single first lesson for <strong>$99</strong>. But here's the part worth understanding:</p>
+        <p>If you carry on with lessons, the <strong>whole $99 comes off your package</strong> — so your first lesson ends up costing you nothing. The only way you're ever out the $99 is if you do one lesson and decide it's not for you. And even then, you've had a real, full lesson for less than our normal rate.</p>
+        <p>So there's no real way to lose. <strong>Worst case</strong>, you got a discounted first lesson. <strong>Best case</strong>, it cost you nothing and you're on your way to your P's.</p>
+        ${BTN}
+        <p>One more thing — you might be thinking the VORT just checks that you can drive, and you already can. There's a wrinkle worth knowing about. Next time.</p>${SIGN}` },
+      { tag:"E2", day:"Day 1", subject:"You can already drive. That's not what the VORT marks.", preview:"The SA-specific habits that catch experienced overseas drivers.",
+        body:`<p>Hi Priya,</p>
+        <p>You already drive well — but driving well and passing the VORT aren't the same thing. It scores Australian-specific habits — roundabout rules, give-way priority, the observation sequence — that experienced overseas drivers lose marks on without realising.</p>
+        <p>Your first $99 lesson is an assessment: one lesson catches those habits before they cost you the test, and if you need it we point you straight through the licence-conversion paperwork. Don't gamble <span class="fill">$370</span> on a maybe.</p>
+        <p>Next, why driving well and passing the VORT aren't the same thing.</p>
+        ${BTN_ASSESS}${SIGN}` },
+      { tag:"E3", day:"Day 2", subject:"Driving well isn't the same as passing", preview:"You drive fine. The VORT marks something else.",
+        body:`<p>Hi Priya,</p>
+        <p>This surprises good overseas drivers: the VORT isn't really a driving test, it's a &ldquo;do you do it the SA way&rdquo; test. You can be a strong driver and still drop points on observation or give-way habits you've never had to think about.</p>
+        <p class="quote">Kanchananapha came to us already driving well — her instructor was &ldquo;calm and punctual… never once made me feel nervous, which really helped me stay confident and pass my test.&rdquo;</p>
+        ${PROOF}
+        ${BTN_ASSESS}
+        <p>One more thing before you decide — the bit everyone asks about: what it costs, and why it's actually worth it. Next.</p>${SIGN}` },
+      { tag:"E4", day:"Day 4", subject:"No lock-in — pay as you go", preview:"$99 is a readiness check, not a commitment.",
+        body:`<p>Hi Priya,</p>
+        <p>You don't have to commit to a package to find out where you stand. The $99 first lesson is a readiness check, not a down-payment — if one lesson is all you need, that's all you do.</p>
+        <p>And on price: cheaper per lesson isn't cheaper per licence. A cheap instructor clocking up hours around the block costs more in the end than getting test-ready in a few focused sessions — especially once you factor in a re-sit: the fee, weeks of delay, and doing it all again.</p>
+        ${BTN}
+        <p>One last thing before you go — and it's not about money. It's about time. I'll explain.</p>${SIGN}` },
+      { tag:"E5", day:"Day 7", subject:"The real cost of waiting (it isn't money)", preview:"Every week is a week off your P's.",
+        body:`<p>Hi Priya,</p>
+        <p>You can already drive here — you're doing it right now on your international licence. The catch is, that runs out. Convert before it does and nothing changes; you just keep driving. Leave it too late and there's a gap where you're suddenly off the road, waiting on a test. So this isn't about gaining your freedom — it's about not losing the one you've already got. And it's quick: for someone already driving, it's usually a couple of weeks' work.</p>
+        <p>Your plan put you at about <strong>5 lessons</strong>, and we've got instructors with openings near you — starting now is simply the difference between sooner and later.</p>
+        <p>And we take the admin off your plate — we book the test for you when you're ready, so it's one less thing between you and your P's.</p>
+        ${BTN}
+        <p>Next, I'll ask you just one quick question — what's actually holding you up. One tap, that's it.</p>${SIGN}` }
+    ]
+  },
+  failed: {
+    label: "Failed (re-sitters)", name: "Sam", est: 4,
+    emails: [
+      { tag:"E1", day:"Day 0", subject:"Your P-plates plan — about 4 lessons", preview:"Plus the bit about the $99 most people miss.",
+        body:`<p>Hi Sam,</p>
+        <p>You just saw your plan — based on your quiz, about <strong>4 lessons</strong> to be test-ready. I've saved it so you can come back any time: <a href="#">View your plan</a></p>
+        <p>You don't need to start over. Most people who've sat the test before are one or two fixes away from a pass — not a whole new course.</p>
+        <p>The easiest way to start is a single first lesson for <strong>$99</strong>. But here's the part worth understanding:</p>
+        <p>If you carry on with lessons, the <strong>whole $99 comes off your package</strong> — so your first lesson ends up costing you nothing. The only way you're ever out the $99 is if you do one lesson and decide it's not for you. And even then, you've had a real, full lesson for less than our normal rate.</p>
+        <p>So there's no real way to lose. <strong>Worst case</strong>, you got a discounted first lesson. <strong>Best case</strong>, it cost you nothing and you're on your way to your P's.</p>
+        ${BTN}
+        <p>One more thing — failing the VORT usually isn't bad luck or a harsh examiner. It's almost always one or two specific, fixable things. I'll explain next.</p>${SIGN}` },
+      { tag:"E2", day:"Day 1", subject:"It probably wasn't bad luck", preview:"Failing the VORT is almost always one or two fixable things.",
+        body:`<p>Hi Sam,</p>
+        <p>If you've sat the VORT before and it didn't go your way, the story in your head is probably &ldquo;unlucky&rdquo; or &ldquo;harsh examiner.&rdquo; Sometimes. But almost always it's one or two specific things — and the examiner's report tells us exactly what. So we don't make you redo a whole course; we find the precise gaps, drill only those, and put you back in when you're actually ready.</p>
+        <p>Next, exactly how we pinpoint what cost you the pass.</p>
+        ${BTN_DIAG}${SIGN}` },
+      { tag:"E3", day:"Day 2", subject:"The fix is smaller than you think", preview:"One or two things from last time. Fixable.",
+        body:`<p>Hi Sam,</p>
+        <p>Here's what almost nobody tells you after a fail: it's rarely your driving. It's one or two specific things the examiner marked — and they're written down. Your first lesson back is a diagnostic: we read exactly what cost you the marks and build a short plan around just those, not a from-scratch course.</p>
+        <p class="quote">Hailey came to us after a knock to her confidence — her instructor was &ldquo;very calm, had lots of good tips and made me feel super confident,&rdquo; and the team &ldquo;reached out with genuine care.&rdquo;</p>
+        ${PROOF}
+        ${BTN_DIAG}
+        <p>One more thing before you decide — the bit everyone asks about: what it costs, and why it's actually worth it. Next.</p>${SIGN}` },
+      { tag:"E4", day:"Day 4", subject:"Cheaper to pass once than to re-sit twice", preview:"What a re-sit really costs you.",
+        body:`<p>Hi Sam,</p>
+        <p>If you're weighing &ldquo;pay for lessons&rdquo; against &ldquo;just re-sit and hope,&rdquo; do the maths. Every re-sit is the test fee, weeks of waiting, and the same nerves all over again. Paying once to fix the one or two things that actually cost you — with a mock that tells us you're ready before you book — works out cheaper than spamming the test. That's the whole point of the guarantee: we don't put you in to gamble, we put you in to pass.</p>
+        ${BTN}
+        <p>One last thing before you go — and it's not about money. It's about time. I'll explain.</p>${SIGN}` },
+      { tag:"E5", day:"Day 7", subject:"The real cost of waiting (it isn't money)", preview:"Every week is a week off your P's.",
+        body:`<p>Hi Sam,</p>
+        <p>Picture the version where it's just… done — the test behind you, and you're driving yourself wherever you need to be without it hanging over you. That's one or two fixes away, not a do-over — realistically a couple of weeks, not a restart. And the longer the gap after a knock, the more the nerves build, so sooner is genuinely easier than later.</p>
+        <p>Your plan put you at about <strong>4 lessons</strong>, and we've got instructors with openings near you — starting now is simply the difference between sooner and later.</p>
+        <p>And we take the admin off your plate — we book the test for you when you're ready, so it's one less thing between you and your P's.</p>
+        ${BTN}
+        <p>Next, I'll ask you just one quick question — what's actually holding you up. One tap, that's it.</p>${SIGN}` }
+    ]
+  }
+};
+
+/* Universal emails (same for every persona) */
+const universal = [
+  { tag:"E6", day:"Day 11", subject:"Can I ask — what's stopping you?", preview:"One tap and I'll get out of your way.",
+    body:`<p>Hi {first name},</p>
+    <p>You did the quiz, your plan's saved — but you haven't booked your first lesson yet. Totally fine. It'd just help me to know why. One tap:</p>
+    <p><a href="#">It's too expensive</a><br><a href="#">Not ready yet / no rush</a><br><a href="#">I've already got it sorted</a><br><a href="#">A bit nervous, honestly</a><br><a href="#">Couldn't find a time near me</a></p>
+    <p>Or just hit reply — I read every one.</p>${SIGN}
+    <p style="color:#999;font-size:12px;"><span class="fill">[BUILD NOTE]</span> survey links use placeholder URL <code>quiz-survey?a=&lt;reason&gt;</code>; swap for the real tagged destination and wire routing: timing→slow track, nervous→reassurance, location→capture suburb, price→premium-justification, sorted→one touch then exit.</p>` },
+  { tag:"E7", day:"Day 13", subject:"Last one from me (for now)", preview:"Your plan's saved whenever you're ready.",
+    body:`<p>Hi {first name},</p>
+    <p>I won't keep filling your inbox. Your <strong>plan</strong> is saved, and the first lesson is still $99 — still credited toward your package if you continue, so still effectively nothing if you carry on.</p>
+    <p>If now's not the time, genuinely no worries — we'll be here. If it is, this is the easiest start you'll get:</p>
+    ${BTN}
+    <p>Or take one more look at your plan: <a href="#">view your plan</a>.</p>
+    <p>And if now's really not the time, grab the free <a href="#">VORT cheat sheet</a> — the five manoeuvres and exactly how each one is scored. We'll check in now and then.</p>${SIGN}` }
+];
+
+/* ---- render ---- */
+function emailCard(e, fromName){
+  return `<div class="email">
+    <div class="hd"><span class="tag">${e.tag}</span><span>${e.day}</span></div>
+    <div class="meta-rows">
+      <p class="subject">${e.subject}</p>
+      <p class="preview">${e.preview}</p>
+      <p class="from">${FROM}</p>
+    </div>
+    <div class="body">${e.body}</div>
+  </div>`;
+}
+
+const nav = document.getElementById('nav');
+const main = document.getElementById('main');
+const keys = Object.keys(personas).concat(['universal']);
+
+keys.forEach((k,i)=>{
+  const btn = document.createElement('button');
+  btn.textContent = k==='universal' ? 'Universal (E6 · E7)' : personas[k].label;
+  btn.dataset.key = k;
+  if(i===0) btn.classList.add('active');
+  btn.onclick = ()=>{
+    document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.persona').forEach(s=>s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('p-'+k).classList.add('active');
+    window.scrollTo(0,0);
+  };
+  nav.appendChild(btn);
+});
+
+Object.keys(personas).forEach((k,i)=>{
+  const p = personas[k];
+  const sec = document.createElement('section');
+  sec.className = 'persona' + (i===0?' active':'');
+  sec.id = 'p-'+k;
+  sec.innerHTML = `<div class="persona-intro">
+      <h2>${p.label}</h2>
+      <div class="meta">Sample contact: <strong>${p.name}</strong> · estimate <strong>${p.est} lessons</strong> · bucket <code>${k}</code><br>Flow: E1 → E2 → E3 → E4 → E5 → <strong>E6 (survey)</strong> → <strong>E7 (final)</strong>. E6 &amp; E7 are universal — see the "Universal" tab.</div>
+    </div>` + p.emails.map(e=>emailCard(e,p.name)).join('');
+  main.appendChild(sec);
+});
+
+const usec = document.createElement('section');
+usec.className='persona'; usec.id='p-universal';
+usec.innerHTML = `<div class="persona-intro"><h2>Universal emails</h2><div class="meta">These two are the same for every persona (no branching). <code>{first name}</code> fills from the contact.</div></div>` + universal.map(e=>emailCard(e,'')).join('');
+main.appendChild(usec);
+</script>
+</body>
+</html>

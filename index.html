@@ -62,6 +62,29 @@
   #fbbar button{border:1px solid var(--blue);background:var(--blue);color:#fff;padding:8px 14px;border-radius:6px;font-size:13px;cursor:pointer;font-weight:600}
   #fbbar button.ghost{background:#fff;color:var(--muted);border-color:var(--line);font-weight:400}
   @media(max-width:560px){ #fbbar{flex-direction:column;align-items:stretch;gap:8px} #fbbar .fbbtns{justify-content:space-between} }
+
+  /* ---- objections coverage panel ---- */
+  .ob-panel{background:#fff;border:1px solid var(--line);border-radius:10px;margin:0 0 18px;overflow:hidden}
+  .ob-panel>summary{cursor:pointer;list-style:none;padding:13px 18px;font-weight:700;font-size:14.5px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .ob-panel>summary::-webkit-details-marker{display:none}
+  .ob-panel>summary::before{content:'▸';color:var(--muted);font-weight:400;margin-right:2px}
+  .ob-panel[open]>summary::before{content:'▾'}
+  .ob-sum{font-weight:400;font-size:12px;display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+  .ob-legend{font-size:12px;color:var(--muted);background:#fbfdff;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:10px 18px;line-height:1.5}
+  .ob-root{padding:11px 18px 3px}
+  .ob-root-h{font-size:11.5px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px}
+  .ob-list{list-style:none;margin:0 0 6px;padding:0}
+  .ob-list li{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;padding:7px 0;border-top:1px solid #f1f4f8;font-size:13.5px}
+  .ob-list li:first-child{border-top:none}
+  .ob-text{flex:1;min-width:200px}
+  .ob-star{color:#e0a200;font-weight:700;margin-right:4px}
+  .ob-tag{font-size:11px;color:var(--muted);background:var(--bg);border-radius:4px;padding:1px 7px;white-space:nowrap}
+  .ck{font-size:11.5px;font-weight:700;border-radius:5px;padding:2px 7px;white-space:nowrap}
+  .ck.ok{background:#e6f4ea;color:#137333}
+  .ck.partial{background:#fef7e0;color:#9a6700}
+  .ck.none{background:#fce8e6;color:#c5221f}
+  .ck-note{flex-basis:100%;font-size:12px;color:var(--muted);margin:1px 0 0;font-style:italic}
+  .ob-fb{border-top:1px solid var(--line);margin-top:6px}
 </style>
 </head>
 <body>
@@ -329,6 +352,154 @@ Object.keys(personas).forEach(k=>{ PERSONA_LABEL[k]=personas[k].label; personas[
 PERSONA_LABEL['universal']='Universal (E6 · E7)';
 universal.forEach(e=>{ ORIG['universal__'+e.tag]={persona:'universal',tag:e.tag,day:e.day,subject:e.subject,preview:e.preview,body:e.body}; });
 
+/* ---- objections (from LicenceMate-Quiz-Objections-List.docx) ---- */
+const _ALL=['beginner_local','beginner_overseas','confident_local','confident_overseas','failed'];
+const _BEG=['beginner_local','beginner_overseas'];
+const _CONF=['confident_local','confident_overseas'];
+const ROOTNAME={A:'A — Trust',B:'B — Over-buying',C:'C — Do I really need this?',D:'D — Value at a premium price',E:'E — Friction / timing',F:'F — Practical facts',X:'Failed-specific'};
+
+const MASTER=[
+  {id:'oA1',root:'A',tag:'All',buckets:_ALL,text:`“Are you actually any good?”`},
+  {id:'oA2',root:'A',tag:'All',buckets:_ALL,text:`“$99 — what’s the catch?”`},
+  {id:'oA3',root:'A',tag:'All',buckets:_ALL,text:`“I got burned by a school/instructor before”`},
+  {id:'oA4',root:'A',tag:'All',buckets:_ALL,text:`“I saw some bad reviews / only 4.7 stars”`},
+  {id:'oA5',root:'A',tag:'Beginner local (parent)',buckets:['beginner_local'],text:`“Are instructors accredited / police-checked / insured? Dual-control car?”`},
+  {id:'oA6',root:'A',tag:'All',buckets:_ALL,text:`“Will they actually show up / not cancel?”`},
+  {id:'oA7',root:'A',tag:'All',buckets:_ALL,text:`“Do I get the same instructor each time?”`},
+  {id:'oA8',root:'A',tag:'Confident',buckets:_CONF,text:`“Do they know my local test routes & examiners?”`},
+
+  {id:'oB1',root:'B',tag:'Beginner local',buckets:['beginner_local'],text:`“Are you going to milk me for lessons I don’t need?”`},
+  {id:'oB2',root:'B',tag:'Confident',buckets:_CONF,text:`“I only need the manoeuvres — don’t waste my time re-teaching what I know”`},
+  {id:'oB3',root:'B',tag:'Confident',buckets:_CONF,text:`“I’ll just do one lesson to be safe”`},
+  {id:'oB4',root:'B',tag:'All',buckets:_ALL,text:`“I don’t want to be locked into a package — can I pay as I go?”`},
+  {id:'oB5',root:'B',tag:'Confident',buckets:_CONF,text:`“I just need a sign-off / a mock, not a whole course”`},
+
+  {id:'oC1',root:'C',tag:'Confident',buckets:_CONF,text:`“I can already drive — just book my test”`},
+  {id:'oC2',root:'C',tag:'Confident',buckets:_CONF,text:`“The VORT’s easy / it’s just a formality”`},
+  {id:'oC3',root:'C',tag:'Confident',buckets:_CONF,text:`“My mates passed with barely any lessons”`},
+  {id:'oC4',root:'C',tag:'Beginner',buckets:_BEG,text:`“This feels like a huge mountain — where do I even start?”`},
+  {id:'oC5',root:'C',tag:'Beginner',buckets:_BEG,text:`“Am I hopeless / is it normal to need this many?”`},
+  {id:'oC6',root:'C',tag:'Beginner',buckets:_BEG,text:`“It’ll take forever / too long”`},
+
+  {id:'oD1',root:'D',tag:'All',buckets:_ALL,star:true,text:`“The local guy is cheaper”`},
+  {id:'oD2',root:'D',tag:'Beginner',buckets:_BEG,text:`“That’s a lot for the whole thing”`},
+  {id:'oD3',root:'D',tag:'All',buckets:_ALL,star:true,text:`“What do I actually get for paying more?”`},
+  {id:'oD4',root:'D',tag:'All (parent)',buckets:_ALL,text:`“Can I pay per lesson / in instalments?”`},
+  {id:'oD5',root:'D',tag:'All',buckets:_ALL,text:`“Is it worth paying when I might fail anyway?”`},
+
+  {id:'oE1',root:'E',tag:'All',buckets:_ALL,text:`“I’ll do it later”`},
+  {id:'oE2',root:'E',tag:'All',buckets:_ALL,text:`“Interested, but no rush”`},
+  {id:'oE3',root:'E',tag:'All',buckets:_ALL,text:`“Too busy with work / uni / shifts”`},
+  {id:'oE4',root:'E',tag:'All',buckets:_ALL,text:`“Can’t commit to a regular weekly slot”`},
+  {id:'oE5',root:'E',tag:'Beginner',buckets:_BEG,text:`“Need to ask my parents / sort out a car first”`},
+  {id:'oE6',root:'E',tag:'Beginner local',buckets:['beginner_local'],text:`“Haven’t got my L’s / done my theory yet”`},
+  {id:'oE7',root:'E',tag:'All',buckets:_ALL,text:`“Waiting until after exams / I turn X / summer”`},
+
+  {id:'oF1',root:'F',tag:'Beginner overseas',buckets:['beginner_overseas'],text:`“Converting my licence sounds like a hassle — I don’t get how it works”`},
+  {id:'oF2',root:'F',tag:'All',buckets:_ALL,text:`“You probably don’t even cover my suburb”`},
+  {id:'oF3',root:'F',tag:'Beginner overseas',buckets:['beginner_overseas'],text:`“You won’t have a female / same-language instructor for me”`},
+  {id:'oF4',root:'F',tag:'Beginner',buckets:_BEG,text:`“I don’t have a car to learn in between lessons”`},
+  {id:'oF5',root:'F',tag:'Beginner local',buckets:['beginner_local'],text:`“Your lessons won’t even count toward my 75 logbook hours”`},
+  {id:'oF6',root:'F',tag:'All',buckets:_ALL,text:`“I’d have to get myself to you — no pickup”`},
+  {id:'oF7',root:'F',tag:'Confident',buckets:_CONF,text:`“I’ll still have to sort the test booking and a car for it myself”`},
+  {id:'oF8',root:'F',tag:'All',buckets:_ALL,text:`“You only do auto”`},
+
+  {id:'oX1',root:'X',tag:'Failed',buckets:['failed'],text:`“I just got unlucky / the examiner was harsh — let me just re-sit”`},
+  {id:'oX2',root:'X',tag:'Failed',buckets:['failed'],text:`“Why pay for more lessons when I already paid to sit the test?”`}
+];
+
+/* default coverage per (persona, root); specific objections refine via OVR */
+const c=e=>({status:'covered',emails:e});
+const p=e=>({status:'partial',emails:e});
+const nn=()=>({status:'none',emails:[]});
+const ROOTCOV={
+  beginner_local:    {A:c(['E2','E3']),B:c(['E1','E2']),C:p(['E1']),D:c(['E4']),E:c(['E5','E6','E7']),F:nn()},
+  beginner_overseas: {A:c(['E3']),B:c(['E1']),C:p(['E1','E3']),D:c(['E4']),E:c(['E5','E6','E7']),F:nn()},
+  confident_local:   {A:c(['E1','E3']),B:c(['E2','E4']),C:c(['E2','E3']),D:c(['E4']),E:c(['E5','E6','E7']),F:nn()},
+  confident_overseas:{A:c(['E1','E3']),B:c(['E2','E4']),C:c(['E2','E3']),D:c(['E4']),E:c(['E5','E6','E7']),F:nn()},
+  failed:            {A:c(['E3']),B:c(['E1','E2']),C:nn(),D:c(['E4']),E:c(['E5','E6','E7']),F:nn()}
+};
+const OVR={
+  oA1:()=>({status:'covered',emails:['E3'],note:`E3 proof + named testimonial answer “are you any good?”`}),
+  oA2:()=>({status:'covered',emails:['E1'],note:`E1 spells out the $99 → fully credited, so “the catch” is met up front`}),
+  oA3:()=>({status:'none',emails:[],note:`“burned before” isn’t directly acknowledged anywhere`}),
+  oA4:()=>({status:'partial',emails:['E3'],note:`proof (81% / volume) builds trust but never rebuts the 4.7★ rating itself`}),
+  oA5:()=>({status:'partial',emails:['E3'],note:`proof names “accredited instructors, dual-control cars”; police-check / insured not stated`}),
+  oA6:()=>({status:'none',emails:[],note:`no-shows / cancellations / reliability not addressed`}),
+  oA7:()=>({status:'covered',emails:['E3'],note:`“the same instructor every lesson, not a roster” in the proof block`}),
+  oA8:()=>({status:'partial',emails:['E2'],note:`E2 cites “the exact local route” as scored, but doesn’t claim route/examiner familiarity`}),
+
+  oB1:()=>({status:'covered',emails:['E2'],note:`“we won’t pad your plan… we live on reviews and referrals”`}),
+  oB2:()=>({status:'covered',emails:['E2'],note:`E2: assessment, not a course — “we won’t waste your time re-teaching what you’ve nailed”`}),
+  oB3:()=>({status:'covered',emails:['E2','E4'],note:`E2 reframes “just one” as an assessment; E4 confirms no lock-in`}),
+  oB4:(ps)=>_CONF.includes(ps)?({status:'covered',emails:['E4'],note:`“No lock-in — pay as you go” is the E4 subject`}):({status:'partial',emails:['E1'],note:`E1 implies it (one lesson, credited) but never says “pay as you go”`}),
+  oB5:()=>({status:'partial',emails:['E2','E3'],note:`E2 sells the assessment; a mock/“sign-off” only shows up via the guarantee in E3`}),
+
+  oC1:()=>({status:'covered',emails:['E2'],note:`E2: “You don’t need lessons. You need a pass.”`}),
+  oC2:()=>({status:'covered',emails:['E3'],note:`E3 is the “treated it as a formality and still failed” story`}),
+  oC3:()=>({status:'none',emails:[],note:`“my mates passed with barely any lessons” isn’t directly countered`}),
+  oC4:()=>({status:'covered',emails:['E1','E3'],note:`E1 reframes the mountain (“six weeks, not months”); E3 walks through the first lesson`}),
+  oC5:()=>({status:'partial',emails:['E1'],note:`E1 (“if you need fewer, we’ll tell you”) eases over-estimating, but “am I hopeless?” isn’t named`}),
+  oC6:()=>({status:'covered',emails:['E1','E5'],note:`“on their P’s in about six weeks” reframes “it’ll take forever”`}),
+
+  oD3:()=>({status:'covered',emails:['E3','E4'],note:`E4 maths + E3 proof/end-to-end answer “what do I get for more?”`}),
+  oD4:()=>({status:'covered',emails:['E4'],note:`E4 mentions instalments (beginner) / pay-as-you-go (confident)`}),
+  oD5:()=>({status:'partial',emails:['E3'],note:`the guarantee (free re-test) in E3 covers “what if I fail”, only where the guarantee applies`}),
+
+  oE1:()=>({status:'covered',emails:['E5','E6'],note:`E5 reframes waiting; E6 survey catches “later”`}),
+  oE2:()=>({status:'covered',emails:['E5','E6']}),
+  oE3:()=>({status:'partial',emails:['E5'],note:`E5 reframes time-cost but doesn’t address being genuinely too busy / shift work`}),
+  oE4:()=>({status:'none',emails:[],note:`“can’t commit to a weekly slot” — scheduling flexibility is never mentioned`}),
+  oE5:()=>({status:'none',emails:[],note:`“ask my parents / sort a car first” not addressed`}),
+  oE6:()=>({status:'none',emails:[],note:`no path for “not at L-stage / theory yet”`}),
+  oE7:()=>({status:'partial',emails:['E5','E6'],note:`cost-of-waiting + survey catch it generally, not the specific milestone`}),
+
+  oF1:()=>({status:'covered',emails:['E2'],note:`E2 lays out permit → VORT → convert and the 3-month clock`}),
+  oF2:()=>({status:'none',emails:[],note:`coverage / “do you service my suburb?” isn’t answered anywhere`}),
+  oF3:()=>({status:'covered',emails:['E3'],note:`E3 offers “a female or same-language instructor on request”`}),
+  oF4:()=>({status:'none',emails:[],note:`the practise-car gap isn’t addressed`}),
+  oF5:()=>({status:'covered',emails:['E5'],note:`E5: “your lessons count toward your 75 logbook hours, we sign the logbook”`}),
+  oF6:(ps)=>_BEG.includes(ps)?({status:'covered',emails:['E3'],note:`E3: “your instructor meets you somewhere convenient”`}):({status:'none',emails:[],note:`pickup / “get myself to you” not mentioned in this flow`}),
+  oF7:()=>({status:'partial',emails:['E5'],note:`E5 “we book the test for you”; a car for the test isn’t mentioned`}),
+  oF8:()=>({status:'none',emails:[],note:`“manual vs auto” isn’t addressed`}),
+
+  oX1:()=>({status:'covered',emails:['E2'],note:`E2: “It probably wasn’t bad luck”`}),
+  oX2:()=>({status:'covered',emails:['E4'],note:`E4: “Cheaper to pass once than to re-sit twice”`})
+};
+function coverage(persona, obj){
+  const ov=OVR[obj.id];
+  if(ov){ const r=ov(persona); if(r) return r; }
+  return (ROOTCOV[persona] && ROOTCOV[persona][obj.root]) || {status:'none',emails:[]};
+}
+function renderObjections(key){
+  const items=MASTER.filter(o=>o.buckets.includes(key));
+  const counts={covered:0,partial:0,none:0};
+  const rootsHtml=['A','B','C','D','E','F','X'].map(root=>{
+    const list=items.filter(o=>o.root===root);
+    if(!list.length) return '';
+    const rows=list.map(o=>{
+      const cov=coverage(key,o); counts[cov.status]++;
+      const chip = cov.status==='covered' ? `<span class="ck ok">✓ ${cov.emails.join(', ')}</span>`
+                 : cov.status==='partial' ? `<span class="ck partial">~ ${cov.emails.length?cov.emails.join(', '):'partial'}</span>`
+                 : `<span class="ck none">✗ not covered</span>`;
+      const note=cov.note?`<div class="ck-note">${cov.note}</div>`:'';
+      const star=o.star?`<span class="ob-star" title="Most important to address (★)">★</span>`:'';
+      return `<li>${chip}<span class="ob-text">${star}${o.text}</span><span class="ob-tag">${o.tag}</span>${note}</li>`;
+    }).join('');
+    return `<div class="ob-root"><div class="ob-root-h">${ROOTNAME[root]}</div><ul class="ob-list">${rows}</ul></div>`;
+  }).join('');
+  const summary=`<span class="ck ok">✓ ${counts.covered}</span><span class="ck partial">~ ${counts.partial}</span><span class="ck none">✗ ${counts.none}</span>`;
+  return `<details class="ob-panel" open>
+    <summary>Objections — coverage map<span class="ob-sum">${summary}</span></summary>
+    <div class="ob-legend"><strong>My assessment of the current emails — treat it as a draft to challenge.</strong> ✓ = handled (which email) · ~ = partly / indirectly · ✗ = not addressed anywhere in this flow. <span class="ob-star">★</span> = flagged most-important in the objections doc. <span class="ob-tag">All</span> = applies to every bucket. E6/E7 are the universal survey + final.</div>
+    ${rootsHtml}
+    <div class="feedback ob-fb">
+      <label>💬 Feedback on objection coverage <span class="fb-hint">— e.g. “E4 should handle D3, not D1”, “F2 (suburb) needs covering somewhere” (saved automatically)</span></label>
+      <textarea class="fb-input" data-id="${key}__OBJECTIONS" placeholder="Which objections are mis-mapped? Which email should pick up which objection?"></textarea>
+    </div>
+  </details>`;
+}
+
 /* ---- render ---- */
 function emailCard(e, key){
   const id = key+'__'+e.tag;
@@ -376,7 +547,7 @@ Object.keys(personas).forEach((k,i)=>{
   sec.innerHTML = (i===0?HOWTO:'') + `<div class="persona-intro">
       <h2>${p.label}</h2>
       <div class="meta">Sample contact: <strong>${p.name}</strong> · estimate <strong>${p.est} lessons</strong> · bucket <code>${k}</code><br>Flow: E1 → E2 → E3 → E4 → E5 → <strong>E6 (survey)</strong> → <strong>E7 (final)</strong>. E6 &amp; E7 are universal — see the "Universal" tab.</div>
-    </div>` + p.emails.map(e=>emailCard(e,k)).join('');
+    </div>` + renderObjections(k) + p.emails.map(e=>emailCard(e,k)).join('');
   main.appendChild(sec);
 });
 
@@ -399,26 +570,27 @@ function recomputeEdits(card){
   card.classList.toggle('edited', !!state.edits[id]);
 }
 
-/* restore saved edits + comments into the DOM */
+/* restore + wire every comment box (emails AND objection panels) */
+document.querySelectorAll('.fb-input').forEach(ta=>{
+  const id = ta.dataset.id;
+  if(state.comments[id]){ ta.value = state.comments[id]; ta.classList.add('has-text'); }
+  ta.addEventListener('input', ()=>{
+    const v = ta.value;
+    if(v.trim()) state.comments[id]=v; else delete state.comments[id];
+    ta.classList.toggle('has-text', !!v.trim());
+    autosize(ta); saveState(); updateCount();
+  });
+  autosize(ta);
+});
+
+/* restore + wire inline copy edits (emails only) */
 document.querySelectorAll('.email').forEach(card=>{
   const id = card.dataset.id;
   const ed = state.edits[id];
   if(ed){ ['subject','preview','body'].forEach(f=>{ if(ed[f]!=null){ const el=card.querySelector('[data-field="'+f+'"]'); if(el) el.innerHTML=ed[f]; } }); card.classList.add('edited'); }
-  const ta = card.querySelector('.fb-input');
-  if(ta && state.comments[id]){ ta.value = state.comments[id]; ta.classList.add('has-text'); }
-
   card.querySelectorAll('[contenteditable="true"]').forEach(el=>{
     el.addEventListener('input', ()=>{ recomputeEdits(card); saveState(); updateCount(); });
   });
-  if(ta){
-    ta.addEventListener('input', ()=>{
-      const v = ta.value;
-      if(v.trim()) state.comments[id]=v; else delete state.comments[id];
-      ta.classList.toggle('has-text', !!v.trim());
-      autosize(ta); saveState(); updateCount();
-    });
-    autosize(ta);
-  }
 });
 
 /* ---- export ---- */
@@ -446,7 +618,7 @@ function countFeedback(){
 function updateCount(){
   const n = countFeedback();
   const el = document.getElementById('fbcount');
-  el.innerHTML = n===0 ? 'No feedback yet' : `<b>${n}</b> email${n===1?'':'s'} with feedback`;
+  el.innerHTML = n===0 ? 'No feedback yet' : `<b>${n}</b> item${n===1?'':'s'} with feedback`;
 }
 function buildMarkdown(){
   let out = '# Feedback — Quiz Email Flows by Persona\n\n_Generated '+new Date().toLocaleString()+'_\n';
@@ -470,6 +642,8 @@ function buildMarkdown(){
         if(edit.body!=null) section += `- _Body →_\n\n${htmlToText(edit.body).split('\n').map(l=>'  '+l).join('\n')}\n`;
       }
     });
+    const objC=(state.comments[g.key+'__OBJECTIONS']||'').trim();
+    if(objC){ any=true; section += `\n### Objection coverage — feedback\n\n${objC}\n`; }
     if(section) out += `\n## ${g.label} (\`${g.key}\`)\n`+section;
   });
   if(!any) out += '\n_No feedback entered yet._\n';
